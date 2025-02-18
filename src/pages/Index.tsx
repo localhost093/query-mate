@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "react-resizable-panels";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
 import StudioPanel from "../components/StudioPanel";
@@ -49,13 +49,13 @@ const Index = () => {
             <SourcePanel sources={sources} onSourceAdd={(source) => setSources([...sources, source])} />
           </ResizablePanel>
           
-          <ResizableHandle className="w-1 bg-gray-800" />
+          <ResizableHandle withHandle className="bg-gray-800" />
           
           <ResizablePanel defaultSize={55} minSize={30}>
             <ChatPanel />
           </ResizablePanel>
           
-          <ResizableHandle className="w-1 bg-gray-800" />
+          <ResizableHandle withHandle className="bg-gray-800" />
           
           <ResizablePanel defaultSize={25} minSize={15} maxSize={30}>
             <StudioPanel />
