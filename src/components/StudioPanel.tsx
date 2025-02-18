@@ -1,51 +1,89 @@
 
-import { FileText, Clock, BookOpen } from "lucide-react";
+import { FileText, Clock, BookOpen, HelpCircle, MessageSquare, Share2 } from "lucide-react";
 import { Button } from "./ui/button";
 
 const StudioPanel = () => {
   return (
-    <div className="h-full p-4 space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">Studio</h2>
-        <p className="text-gray-500 text-sm mt-1">Analyze and organize your research</p>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="space-y-2">
-        <Button 
-          variant="outline" 
-          className="w-full justify-start bg-transparent hover:bg-gray-50 border-gray-200 text-gray-700"
-        >
-          <FileText className="mr-2 h-4 w-4" />
-          Study guide
-        </Button>
-        <Button 
-          variant="outline" 
-          className="w-full justify-start bg-transparent hover:bg-gray-50 border-gray-200 text-gray-700"
-        >
-          <Clock className="mr-2 h-4 w-4" />
-          Timeline
-        </Button>
-        <Button 
-          variant="outline" 
-          className="w-full justify-start bg-transparent hover:bg-gray-50 border-gray-200 text-gray-700"
-        >
-          <BookOpen className="mr-2 h-4 w-4" />
-          Summary
+    <div className="h-full flex flex-col bg-[#1a1b1e]">
+      <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+        <h2 className="text-sm font-medium">Studio</h2>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Share2 className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Notes Section */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-500">Notes</h3>
+      <div className="p-4 space-y-6 flex-1 overflow-y-auto">
         <div className="space-y-2">
-          {/* Note preview cards */}
-          <div className="p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200">
-            <h4 className="font-medium text-gray-900">Research Overview</h4>
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-              Key findings from the literature review...
-            </p>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">Audio Overview</span>
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="h-4 w-4" />
+            </Button>
           </div>
+          
+          <div className="p-3 rounded-lg bg-gray-800/50 border border-gray-700">
+            <h4 className="font-medium">Click to load the audio overview</h4>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-sm text-gray-400">Notes</h3>
+          <Button
+            variant="outline"
+            className="w-full justify-start bg-transparent hover:bg-gray-800 border-gray-700 text-gray-300"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Add note
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:bg-gray-800"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Study guide
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:bg-gray-800"
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            Timeline
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:bg-gray-800"
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            FAQ
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-sm text-gray-400">Help</h3>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:bg-gray-800"
+          >
+            <HelpCircle className="mr-2 h-4 w-4" />
+            NotebookLM Help
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:bg-gray-800"
+          >
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Send feedback
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:bg-gray-800"
+          >
+            <Share2 className="mr-2 h-4 w-4" />
+            Discord
+          </Button>
         </div>
       </div>
     </div>
