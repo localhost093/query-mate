@@ -1,9 +1,10 @@
 
-import { Plus, ChevronDown, File } from "lucide-react";
+import { Plus, ChevronDown, File, Upload } from "lucide-react";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { useState } from "react";
 import { Input } from "./ui/input";
+import { useToast } from "../hooks/use-toast";
 
 interface SourcePanelProps {
   sources: string[];
@@ -11,6 +12,7 @@ interface SourcePanelProps {
 }
 
 const SourcePanel = ({ sources, onSourceAdd }: SourcePanelProps) => {
+  const { toast } = useToast();
   const [newSource, setNewSource] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
@@ -20,6 +22,19 @@ const SourcePanel = ({ sources, onSourceAdd }: SourcePanelProps) => {
       onSourceAdd(newSource.trim());
       setNewSource("");
       setShowAddForm(false);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Here you would typically send the file to your backend
+      // For now, we'll just add it as a source
+      onSourceAdd(file.name);
+      toast({
+        title: "File uploaded",
+        description: `${file.name} has been added to your sources.`,
+      });
     }
   };
 
@@ -75,14 +90,33 @@ const SourcePanel = ({ sources, onSourceAdd }: SourcePanelProps) => {
             </div>
           </div>
         ) : (
-          <Button 
-            variant="outline" 
-            className="w-full border-dashed bg-transparent hover:bg-muted"
-            onClick={() => setShowAddForm(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add source
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              variant="outline" 
+              className="w-full border-dashed bg-transparent hover:bg-muted"
+              onClick={() => setShowAddForm(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add source
+            </Button>
+            <div className="relative">
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                onChange={handleFileUpload}
+                accept=".pdf,.docx,.txt"
+              />
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => document.getElementById('file-upload')?.click()}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload file
+              </Button>
+            </div>
+          </div>
         )}
 
         <div className="space-y-2">

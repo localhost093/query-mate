@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 240 10% 97%;
+    --background: 0 0% 97%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
@@ -28,24 +28,24 @@
   }
 
   .dark {
-    --background: 240 10% 13%;
+    --background: 240 10% 16%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 15%;
+    --card: 240 10% 18%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 15%;
+    --popover: 240 10% 18%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 20%;
+    --secondary: 240 3.7% 24%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 20%;
+    --muted: 240 3.7% 24%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 20%;
+    --accent: 240 3.7% 24%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 20%;
-    --input: 240 3.7% 20%;
+    --border: 240 3.7% 24%;
+    --input: 240 3.7% 24%;
     --ring: 240 4.9% 83.9%;
   }
 }
@@ -75,4 +75,8 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #4B5563;
+}
+
+.glass-panel {
+  @apply bg-background/80 backdrop-blur-sm border border-border/50 shadow-lg;
 }

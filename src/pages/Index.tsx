@@ -4,12 +4,14 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
 import StudioPanel from "../components/StudioPanel";
+import SettingsDialog from "../components/SettingsDialog";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Settings } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
+  const [showSettings, setShowSettings] = useState(false);
   const [sources, setSources] = useState<string[]>([
     "Getting Started with NotebookLM",
     "NotebookLM Features",
@@ -21,7 +23,7 @@ const Index = () => {
   ]);
 
   return (
-    <div className={`h-screen w-full ${theme === "dark" ? "bg-[#222222]" : "bg-[#f3f3f3]"} text-gray-100 transition-colors duration-200 overflow-hidden`}>
+    <div className={`h-screen w-full ${theme === "dark" ? "bg-[#2a2a2a]" : "bg-[#f8f8f8]"} text-gray-100 transition-colors duration-200 overflow-hidden`}>
       {/* Header */}
       <div className={`h-12 border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"} flex items-center justify-between px-4 transition-colors duration-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60`}>
         <div className="flex items-center gap-2">
@@ -37,7 +39,7 @@ const Index = () => {
               <Moon className="h-5 w-5 text-gray-900" />
             }
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
             <Settings className={`h-5 w-5 ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`} />
           </Button>
         </div>
@@ -45,7 +47,7 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="h-[calc(100vh-48px)] p-4">
-        <ResizablePanelGroup direction="horizontal" className="rounded-lg overflow-hidden border bg-card">
+        <ResizablePanelGroup direction="horizontal" className="rounded-lg overflow-hidden border bg-card shadow-lg">
           <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
             <SourcePanel sources={sources} onSourceAdd={(source) => setSources([...sources, source])} />
           </ResizablePanel>
@@ -63,6 +65,11 @@ const Index = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+
+      <SettingsDialog 
+        open={showSettings} 
+        onOpenChange={setShowSettings}
+      />
     </div>
   );
 };
