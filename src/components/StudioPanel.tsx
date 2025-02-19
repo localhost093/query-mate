@@ -1,10 +1,10 @@
-
-import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown } from "lucide-react";
+import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, Minimize2, Maximize2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
+import MarkdownEditor from "./MarkdownEditor";
 
 interface Note {
   id: string;
@@ -21,9 +21,11 @@ interface Folder {
 
 interface StudioPanelProps {
   onNoteSelect: (noteId: string) => void;
+  isFullScreen?: boolean;
+  onToggleFullScreen?: () => void;
 }
 
-const StudioPanel = ({ onNoteSelect }: StudioPanelProps) => {
+const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioPanelProps) => {
   const { toast } = useToast();
   const [folders, setFolders] = useState<Folder[]>([
     { id: "1", name: "General Notes", isOpen: true },
@@ -38,6 +40,7 @@ const StudioPanel = ({ onNoteSelect }: StudioPanelProps) => {
   const [showNewNote, setShowNewNote] = useState(false);
   const [newNoteTitle, setNewNoteTitle] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
 
   const handleAddFolder = () => {
     if (newFolderName.trim()) {
@@ -97,6 +100,16 @@ const StudioPanel = ({ onNoteSelect }: StudioPanelProps) => {
           >
             <Plus className="h-4 w-4" />
           </Button>
+          {onToggleFullScreen && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onToggleFullScreen}
+            >
+              {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -185,17 +198,22 @@ const StudioPanel = ({ onNoteSelect }: StudioPanelProps) => {
                 <div className="ml-4 space-y-1">
                   {notes
                     .filter(note => note.folderId === folder.id)
-                    .map(note => (
-                      <Button
-                        key={note.id}
-                        variant="ghost"
-                        className="w-full justify-start pl-6"
-                        onClick={() => onNoteSelect(note.id)}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        {note.title}
-                      </Button>
-                    ))
+                    .map(note => {
+                      return (
+                        <Button
+                          key={note.id}
+                          variant="ghost"
+                          className="w-full justify-start pl-6"
+                          onClick={() => {
+                            onNoteSelect(note.id);
+                            setSelectedNote(note);
+                          }}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          {note.title}
+                        </Button>
+                      );
+                    })
                   }
                 </div>
               )}
