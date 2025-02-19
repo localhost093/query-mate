@@ -7,9 +7,10 @@ import { useToast } from "../hooks/use-toast";
 
 interface ChatPanelProps {
   selectedSource?: string;
+  selectedNote?: string;
 }
 
-const ChatPanel = ({ selectedSource }: ChatPanelProps) => {
+const ChatPanel = ({ selectedSource, selectedNote }: ChatPanelProps) => {
   const { theme } = useTheme();
   const { toast } = useToast();
   const [message, setMessage] = useState("");
