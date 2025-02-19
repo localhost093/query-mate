@@ -1,3 +1,4 @@
+
 # main.py
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -156,3 +157,4 @@ async def chat(message: str):
     return {"response": response["choices"][0]["text"]}
 
 # Run with: uvicorn main:app --reload
+
