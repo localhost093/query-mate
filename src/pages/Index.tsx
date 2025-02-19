@@ -12,6 +12,7 @@ import { useTheme } from "../context/ThemeContext";
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<string | undefined>();
   const [sources, setSources] = useState<string[]>([
     "Getting Started with NotebookLM",
     "NotebookLM Features",
@@ -47,15 +48,19 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="h-[calc(100vh-48px)] p-4">
-        <ResizablePanelGroup direction="horizontal" className="rounded-lg overflow-hidden border bg-card shadow-lg">
+        <ResizablePanelGroup direction="horizontal" className="rounded-xl overflow-hidden border bg-card shadow-lg">
           <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-            <SourcePanel sources={sources} onSourceAdd={(source) => setSources([...sources, source])} />
+            <SourcePanel 
+              sources={sources} 
+              onSourceAdd={(source) => setSources([...sources, source])}
+              onSourceSelect={setSelectedSource}
+            />
           </ResizablePanel>
           
           <ResizableHandle withHandle />
           
           <ResizablePanel defaultSize={55} minSize={30}>
-            <ChatPanel />
+            <ChatPanel selectedSource={selectedSource} />
           </ResizablePanel>
           
           <ResizableHandle withHandle />

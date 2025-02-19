@@ -5,146 +5,112 @@ import { Checkbox } from "./ui/checkbox";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { useToast } from "../hooks/use-toast";
+import { useDropzone } from "react-dropzone";
 
 interface SourcePanelProps {
   sources: string[];
   onSourceAdd: (source: string) => void;
+  onSourceSelect: (source: string) => void;
 }
 
-const SourcePanel = ({ sources, onSourceAdd }: SourcePanelProps) => {
+const SourcePanel = ({ sources, onSourceAdd, onSourceSelect }: SourcePanelProps) => {
   const { toast } = useToast();
-  const [newSource, setNewSource] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showUploadArea, setShowUploadArea] = useState(false);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
 
-  const handleSourceAdd = () => {
-    if (newSource.trim()) {
-      onSourceAdd(newSource.trim());
-      setNewSource("");
-      setShowAddForm(false);
+  const onDrop = async (acceptedFiles: File[]) => {
+    for (const file of acceptedFiles) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('http://localhost:8000/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          onSourceAdd(file.name);
+          toast({
+            title: "File uploaded successfully",
+            description: `${file.name} has been processed and added to your sources.`,
+          });
+        } else {
+          throw new Error('Upload failed');
+        }
+      } catch (error) {
+        toast({
+          title: "Upload failed",
+          description: "There was an error uploading your file.",
+          variant: "destructive",
+        });
+      }
     }
+    setShowUploadArea(false);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Here you would typically send the file to your backend
-      // For now, we'll just add it as a source
-      onSourceAdd(file.name);
-      toast({
-        title: "File uploaded",
-        description: `${file.name} has been added to your sources.`,
-      });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'text/plain': ['.txt']
     }
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedSources.length === sources.length) {
-      setSelectedSources([]);
-    } else {
-      setSelectedSources([...sources]);
-    }
-  };
-
-  const toggleSource = (source: string) => {
-    if (selectedSources.includes(source)) {
-      setSelectedSources(selectedSources.filter(s => s !== source));
-    } else {
-      setSelectedSources([...selectedSources, source]);
-    }
-  };
+  });
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background rounded-xl">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <h2 className="text-sm font-medium text-foreground">Sources</h2>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
           <ChevronDown className="h-4 w-4" />
         </Button>
       </div>
       
       <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-        {showAddForm ? (
-          <div className="space-y-2">
-            <Input
-              placeholder="Enter source name"
-              value={newSource}
-              onChange={(e) => setNewSource(e.target.value)}
-              className="bg-background"
-            />
-            <div className="flex gap-2">
-              <Button 
-                variant="default" 
-                className="flex-1"
-                onClick={handleSourceAdd}
-              >
-                Add
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={() => setShowAddForm(false)}
-              >
-                Cancel
-              </Button>
-            </div>
+        {showUploadArea ? (
+          <div 
+            {...getRootProps()} 
+            className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors
+              ${isDragActive ? 'border-primary bg-primary/5' : 'border-border'}
+              hover:border-primary hover:bg-primary/5`}
+          >
+            <input {...getInputProps()} />
+            <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            {isDragActive ? (
+              <p className="text-sm text-muted-foreground">Drop your files here</p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Drag & drop files here, or click to select
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Supports PDF, DOC, DOCX, and TXT
+                </p>
+              </>
+            )}
           </div>
         ) : (
-          <div className="space-y-2">
-            <Button 
-              variant="outline" 
-              className="w-full border-dashed bg-transparent hover:bg-muted"
-              onClick={() => setShowAddForm(true)}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add source
-            </Button>
-            <div className="relative">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                onChange={handleFileUpload}
-                accept=".pdf,.docx,.txt"
-              />
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload file
-              </Button>
-            </div>
-          </div>
+          <Button 
+            variant="outline" 
+            className="w-full rounded-xl border-dashed bg-transparent hover:bg-muted"
+            onClick={() => setShowUploadArea(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add source
+          </Button>
         )}
 
         <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="all-sources" 
-              checked={selectedSources.length === sources.length}
-              onCheckedChange={toggleSelectAll}
-            />
-            <label htmlFor="all-sources" className="text-sm text-muted-foreground">
-              Select all sources
-            </label>
-          </div>
-          
           {sources.map((source, index) => (
             <div 
               key={index}
-              className="flex items-center space-x-2 p-2 rounded hover:bg-muted transition-colors cursor-pointer"
-              onClick={() => toggleSource(source)}
+              className="flex items-center space-x-2 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer"
+              onClick={() => onSourceSelect(source)}
             >
-              <Checkbox 
-                id={`source-${index}`}
-                checked={selectedSources.includes(source)}
-              />
               <File className="h-4 w-4 text-blue-400" />
-              <label htmlFor={`source-${index}`} className="text-sm text-foreground">
-                {source}
-              </label>
+              <span className="text-sm text-foreground">{source}</span>
             </div>
           ))}
         </div>

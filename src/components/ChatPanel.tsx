@@ -5,37 +5,53 @@ import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../hooks/use-toast";
 
-const ChatPanel = () => {
+interface ChatPanelProps {
+  selectedSource?: string;
+}
+
+const ChatPanel = ({ selectedSource }: ChatPanelProps) => {
   const { theme } = useTheme();
   const { toast } = useToast();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "ai" }>>([
-    { text: "Hello! I'm here to help you understand NotebookLM. What would you like to know?", sender: "ai" }
+    { 
+      text: selectedSource 
+        ? `Hello! I'm here to help you understand ${selectedSource}. What would you like to know?`
+        : "Hello! I'm here to help you understand NotebookLM. What would you like to know?", 
+      sender: "ai" 
+    }
   ]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (message.trim()) {
       setMessages([...messages, { text: message, sender: "user" }]);
       setMessage("");
-      // Simulated AI response
-      setTimeout(() => {
-        setMessages(prev => [...prev, {
-          text: "I'm processing your request. This is a placeholder response until the backend is connected.",
-          sender: "ai"
-        }]);
-      }, 1000);
+
+      try {
+        const response = await fetch('http://localhost:8000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message, source: selectedSource }),
+        });
+
+        if (!response.ok) throw new Error('Chat request failed');
+
+        const data = await response.json();
+        setMessages(prev => [...prev, { text: data.response, sender: "ai" }]);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to get response from the chat service.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleSaveToNote = () => {
-    toast({
-      title: "Note saved",
-      description: "Your conversation has been saved to notes.",
-    });
-  };
-
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background rounded-xl">
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.map((msg, index) => (
@@ -44,10 +60,10 @@ const ChatPanel = () => {
               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] p-3 rounded-lg ${
+                className={`max-w-[80%] p-4 ${
                   msg.sender === "user"
-                    ? "bg-primary text-primary-foreground ml-auto"
-                    : "bg-muted"
+                    ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm ml-auto"
+                    : "bg-muted rounded-2xl rounded-tl-sm"
                 }`}
               >
                 {msg.text}
@@ -58,22 +74,7 @@ const ChatPanel = () => {
       </div>
 
       <div className="border-t border-border p-4">
-        <div className="max-w-3xl mx-auto flex gap-4">
-          <Button variant="outline" className="flex-1" onClick={handleSaveToNote}>
-            <Save className="mr-2 h-4 w-4" />
-            Save to note
-          </Button>
-          <Button variant="outline" className="flex-1">
-            <FileText className="mr-2 h-4 w-4" />
-            Add note
-          </Button>
-          <Button variant="outline" className="flex-1">
-            <Mic className="mr-2 h-4 w-4" />
-            Audio Overview
-          </Button>
-        </div>
-        
-        <div className="mt-4 max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="relative">
             <input
               type="text"
@@ -81,11 +82,17 @@ const ChatPanel = () => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Start typing..."
-              className="w-full bg-muted/50 rounded-lg pl-4 pr-24 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="capsule-input"
             />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2">
-              <span className="text-sm text-muted-foreground">7 sources</span>
-              <Button size="sm" className="h-8" onClick={handleSend}>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2 items-center">
+              <span className="text-sm text-muted-foreground">
+                {selectedSource ? '1 source' : 'No source selected'}
+              </span>
+              <Button 
+                size="icon" 
+                className="round-button"
+                onClick={handleSend}
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
