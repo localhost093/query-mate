@@ -1,18 +1,21 @@
 
 import { useState } from "react";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
 import StudioPanel from "../components/StudioPanel";
 import SettingsDialog from "../components/SettingsDialog";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Settings } from "lucide-react";
+import { Moon, Sun, Settings, PanelLeftClose, PanelRightClose } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
   const [showSettings, setShowSettings] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | undefined>();
+  const [selectedNote, setSelectedNote] = useState<string | undefined>();
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
   const [sources, setSources] = useState<string[]>([
     "Getting Started with NotebookLM",
     "NotebookLM Features",
@@ -48,27 +51,65 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="h-[calc(100vh-48px)] p-4">
-        <ResizablePanelGroup direction="horizontal" className="rounded-xl overflow-hidden border bg-card shadow-lg">
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-            <SourcePanel 
-              sources={sources} 
-              onSourceAdd={(source) => setSources([...sources, source])}
-              onSourceSelect={setSelectedSource}
+        <div className="relative h-full flex gap-4">
+          {/* Left Sidebar Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-2 z-50 lg:hidden"
+            onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+
+          {/* Left Sidebar */}
+          <div className={cn(
+            "w-80 shrink-0 transition-all duration-300",
+            leftSidebarOpen ? "translate-x-0" : "-translate-x-full",
+            "absolute lg:relative left-0 z-40",
+            "lg:translate-x-0",
+            !leftSidebarOpen && "lg:w-0"
+          )}>
+            <div className="h-full glass-panel p-2">
+              <SourcePanel 
+                sources={sources} 
+                onSourceAdd={(source) => setSources([...sources, source])}
+                onSourceSelect={setSelectedSource}
+              />
+            </div>
+          </div>
+
+          {/* Main Chat Area */}
+          <div className="flex-1 glass-panel">
+            <ChatPanel 
+              selectedSource={selectedSource} 
+              selectedNote={selectedNote}
             />
-          </ResizablePanel>
-          
-          <ResizableHandle withHandle />
-          
-          <ResizablePanel defaultSize={55} minSize={30}>
-            <ChatPanel selectedSource={selectedSource} />
-          </ResizablePanel>
-          
-          <ResizableHandle withHandle />
-          
-          <ResizablePanel defaultSize={25} minSize={15} maxSize={30}>
-            <StudioPanel />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+          </div>
+
+          {/* Right Sidebar Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-2 z-50 lg:hidden"
+            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+          >
+            <PanelRightClose className="h-4 w-4" />
+          </Button>
+
+          {/* Right Sidebar */}
+          <div className={cn(
+            "w-80 shrink-0 transition-all duration-300",
+            rightSidebarOpen ? "translate-x-0" : "translate-x-full",
+            "absolute lg:relative right-0 z-40",
+            "lg:translate-x-0",
+            !rightSidebarOpen && "lg:w-0"
+          )}>
+            <div className="h-full glass-panel p-2">
+              <StudioPanel onNoteSelect={setSelectedNote} />
+            </div>
+          </div>
+        </div>
       </div>
 
       <SettingsDialog 
