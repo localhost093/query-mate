@@ -1,3 +1,4 @@
+
 import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, Minimize2, Maximize2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -179,47 +180,60 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
           </div>
         )}
 
-        <div className="space-y-2">
-          {folders.map(folder => (
-            <div key={folder.id} className="space-y-1">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => toggleFolder(folder.id)}
-              >
-                {folder.isOpen ? 
-                  <ChevronDown className="mr-2 h-4 w-4" /> : 
-                  <ChevronRight className="mr-2 h-4 w-4" />
-                }
-                {folder.name}
-              </Button>
-              
-              {folder.isOpen && (
-                <div className="ml-4 space-y-1">
-                  {notes
-                    .filter(note => note.folderId === folder.id)
-                    .map(note => {
-                      return (
-                        <Button
-                          key={note.id}
-                          variant="ghost"
-                          className="w-full justify-start pl-6"
-                          onClick={() => {
-                            onNoteSelect(note.id);
-                            setSelectedNote(note);
-                          }}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          {note.title}
-                        </Button>
-                      );
-                    })
+        {isFullScreen && selectedNote ? (
+          <MarkdownEditor
+            content={selectedNote.content}
+            onChange={(content) => {
+              setNotes(notes.map(note =>
+                note.id === selectedNote.id ? { ...note, content } : note
+              ));
+            }}
+            isFullScreen={isFullScreen}
+            onToggleFullScreen={onToggleFullScreen}
+          />
+        ) : (
+          <div className="space-y-2">
+            {folders.map(folder => (
+              <div key={folder.id} className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => toggleFolder(folder.id)}
+                >
+                  {folder.isOpen ? 
+                    <ChevronDown className="mr-2 h-4 w-4" /> : 
+                    <ChevronRight className="mr-2 h-4 w-4" />
                   }
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                  {folder.name}
+                </Button>
+                
+                {folder.isOpen && (
+                  <div className="ml-4 space-y-1">
+                    {notes
+                      .filter(note => note.folderId === folder.id)
+                      .map(note => {
+                        return (
+                          <Button
+                            key={note.id}
+                            variant="ghost"
+                            className="w-full justify-start pl-6"
+                            onClick={() => {
+                              onNoteSelect(note.id);
+                              setSelectedNote(note);
+                            }}
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            {note.title}
+                          </Button>
+                        );
+                      })
+                    }
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

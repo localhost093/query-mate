@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Settings, PanelLeftClose, PanelRightClose } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { cn } from "@/lib/utils";
+import MarkdownEditor from "../components/MarkdownEditor";
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
@@ -52,24 +52,22 @@ const Index = () => {
       {/* Main Content */}
       <div className="h-[calc(100vh-48px)] p-4">
         <div className="relative h-full flex gap-4">
-          {/* Left Sidebar Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-2 top-2 z-50 lg:hidden"
-            onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </Button>
-
           {/* Left Sidebar */}
           <div className={cn(
-            "w-80 shrink-0 transition-all duration-300",
+            "w-80 shrink-0 transition-all duration-300 relative",
             leftSidebarOpen ? "translate-x-0" : "-translate-x-full",
             "absolute lg:relative left-0 z-40",
             "lg:translate-x-0",
             !leftSidebarOpen && "lg:w-0"
           )}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -right-10 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md"
+              onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </Button>
             <div className="h-full glass-panel p-2">
               <SourcePanel 
                 sources={sources} 
@@ -81,32 +79,42 @@ const Index = () => {
 
           {/* Main Chat Area */}
           <div className="flex-1 glass-panel">
-            <ChatPanel 
-              selectedSource={selectedSource} 
-              selectedNote={selectedNote}
-            />
+            {selectedNote ? (
+              <MarkdownEditor
+                content={selectedNote}
+                onChange={() => {}}
+                isFullScreen={false}
+              />
+            ) : (
+              <ChatPanel 
+                selectedSource={selectedSource} 
+                selectedNote={selectedNote}
+              />
+            )}
           </div>
-
-          {/* Right Sidebar Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 z-50 lg:hidden"
-            onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-          >
-            <PanelRightClose className="h-4 w-4" />
-          </Button>
 
           {/* Right Sidebar */}
           <div className={cn(
-            "w-80 shrink-0 transition-all duration-300",
+            "w-80 shrink-0 transition-all duration-300 relative",
             rightSidebarOpen ? "translate-x-0" : "translate-x-full",
             "absolute lg:relative right-0 z-40",
             "lg:translate-x-0",
             !rightSidebarOpen && "lg:w-0"
           )}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -left-10 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md"
+              onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+            >
+              <PanelRightClose className="h-4 w-4" />
+            </Button>
             <div className="h-full glass-panel p-2">
-              <StudioPanel onNoteSelect={setSelectedNote} />
+              <StudioPanel 
+                onNoteSelect={setSelectedNote}
+                isFullScreen={false}
+                onToggleFullScreen={() => {}}
+              />
             </div>
           </div>
         </div>
