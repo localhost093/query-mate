@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
@@ -26,8 +27,16 @@ const Index = () => {
     "Using NotebookLM with Meeting/Interview Transcripts"
   ]);
 
+  const handleNoteSelect = (noteId: string) => {
+    setSelectedNote(noteId);
+  };
+
+  const handleBackToChat = () => {
+    setSelectedNote(undefined);
+  };
+
   return (
-    <div className={`h-screen w-full ${theme === "dark" ? "bg-[#2a2a2a]" : "bg-[#f8f8f8]"} text-gray-100 transition-colors duration-200 overflow-hidden`}>
+    <div className={`h-screen w-full ${theme === "dark" ? "bg-[#22262b]" : "bg-[#edeffa]"} text-gray-100 transition-colors duration-200 overflow-hidden`}>
       {/* Header */}
       <div className={`h-12 border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"} flex items-center justify-between px-4 transition-colors duration-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60`}>
         <div className="flex items-center gap-2">
@@ -84,6 +93,7 @@ const Index = () => {
                 content={selectedNote}
                 onChange={() => {}}
                 isFullScreen={false}
+                onBackToChat={handleBackToChat}
               />
             ) : (
               <ChatPanel 
@@ -111,7 +121,7 @@ const Index = () => {
             </Button>
             <div className="h-full glass-panel p-2">
               <StudioPanel 
-                onNoteSelect={setSelectedNote}
+                onNoteSelect={handleNoteSelect}
                 isFullScreen={false}
                 onToggleFullScreen={() => {}}
               />
