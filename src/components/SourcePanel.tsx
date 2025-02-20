@@ -1,16 +1,10 @@
 
-import { Plus, ChevronDown, File, Upload, Pencil, Trash } from "lucide-react";
+import { Plus, File, Pencil, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { useToast } from "../hooks/use-toast";
 import FileUploadDialog from "./FileUploadDialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 
 interface SourcePanelProps {
   sources: string[];
@@ -112,37 +106,33 @@ const SourcePanel = ({
                     onClick={() => handleSourceClick(source)}
                   >
                     <File className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm text-foreground">{source}</span>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <span className="text-sm text-foreground flex-1">{source}</span>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100"
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => {
+                        className="h-6 w-6"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setEditingSource(source);
                           setNewSourceName(source);
                         }}
                       >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Rename
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => onSourceDelete(source)}
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-red-500"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSourceDelete(source);
+                        }}
                       >
-                        <Trash className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

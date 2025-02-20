@@ -84,15 +84,15 @@ const Index = () => {
             "lg:translate-x-0",
             !leftSidebarOpen && "lg:w-0"
           )}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -right-10 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md"
-              onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
-            <div className="h-full glass-panel p-2">
+            <div className="h-full glass-panel p-2 relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -right-3 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md rounded-full"
+                onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </Button>
               <SourcePanel 
                 sources={sources} 
                 onSourceAdd={(source) => setSources([...sources, source])}
@@ -111,7 +111,7 @@ const Index = () => {
                 content={selectedNote}
                 onChange={setSelectedNote}
                 isFullScreen={false}
-                onBackToChat={handleBackToChat}
+                onToggleFullScreen={() => {}}
               />
             ) : (
               <ChatPanel 
@@ -129,15 +129,15 @@ const Index = () => {
             "lg:translate-x-0",
             !rightSidebarOpen && "lg:w-0"
           )}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -left-10 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md"
-              onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-            >
-              <PanelRightClose className="h-4 w-4" />
-            </Button>
-            <div className="h-full glass-panel p-2">
+            <div className="h-full glass-panel p-2 relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -left-3 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md rounded-full"
+                onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+              >
+                <PanelRightClose className="h-4 w-4" />
+              </Button>
               <StudioPanel 
                 onNoteSelect={handleNoteSelect}
                 isFullScreen={false}
