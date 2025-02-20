@@ -33,10 +33,25 @@ const Index = () => {
 
   const handleBackToChat = () => {
     setSelectedNote(undefined);
+    setSelectedSource(undefined);
+  };
+
+  const handleSourceDelete = (source: string) => {
+    setSources(sources.filter(s => s !== source));
+    if (selectedSource === source) {
+      setSelectedSource(undefined);
+    }
+  };
+
+  const handleSourceRename = (oldName: string, newName: string) => {
+    setSources(sources.map(s => s === oldName ? newName : s));
+    if (selectedSource === oldName) {
+      setSelectedSource(newName);
+    }
   };
 
   return (
-    <div className={`h-screen w-full ${theme === "dark" ? "bg-[#22262b]" : "bg-[#edeffa]"} text-gray-100 transition-colors duration-200 overflow-hidden`}>
+    <div className={`h-screen w-full ${theme === "dark" ? "bg-[#22262b]" : "bg-[#edeffa]"} transition-colors duration-200 overflow-hidden`}>
       {/* Header */}
       <div className={`h-12 border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"} flex items-center justify-between px-4 transition-colors duration-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60`}>
         <div className="flex items-center gap-2">
@@ -82,6 +97,9 @@ const Index = () => {
                 sources={sources} 
                 onSourceAdd={(source) => setSources([...sources, source])}
                 onSourceSelect={setSelectedSource}
+                onSourceDelete={handleSourceDelete}
+                onSourceRename={handleSourceRename}
+                onBackToChat={handleBackToChat}
               />
             </div>
           </div>
@@ -91,7 +109,7 @@ const Index = () => {
             {selectedNote ? (
               <MarkdownEditor
                 content={selectedNote}
-                onChange={() => {}}
+                onChange={setSelectedNote}
                 isFullScreen={false}
                 onBackToChat={handleBackToChat}
               />
