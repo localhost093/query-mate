@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
@@ -56,7 +57,7 @@ const Index = () => {
   return (
     <div className={`h-screen w-full ${theme === "dark" ? "bg-[#22262b]" : "bg-[#edeffa]"} transition-colors duration-200 overflow-hidden`}>
       {/* Header */}
-      <div className={`h-12 border-b ${theme === "dark" ? "border-gray-700" : "border-gray-200"} flex items-center justify-between px-4 transition-colors duration-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60`}>
+      <div className={`h-12 flex items-center justify-between px-4 transition-all duration-300 ${theme === "dark" ? "bg-[#22262b]/95" : "bg-[#edeffa]/95"} backdrop-blur supports-[backdrop-filter]:bg-background/60`}>
         <div className="flex items-center gap-2">
           <img src="/lovable-uploads/72e3b36f-557c-4941-95ef-868bae28e5a3.png" alt="NotebookLM" className="h-6 w-6" />
           <h1 className={`text-lg font-medium ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>
@@ -81,21 +82,23 @@ const Index = () => {
         <div className="relative h-full flex gap-4">
           {/* Left Sidebar */}
           <div className={cn(
-            "w-80 shrink-0 transition-all duration-300 relative",
-            leftSidebarOpen ? "translate-x-0" : "-translate-x-full",
+            "w-80 shrink-0 transition-all duration-500 ease-in-out transform",
+            leftSidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%-24px)]",
             "absolute lg:relative left-0 z-40",
             "lg:translate-x-0",
-            !leftSidebarOpen && "lg:w-0"
+            !leftSidebarOpen && "lg:w-6"
           )}>
             <div className="h-full glass-panel p-2 relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute -right-3 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md rounded-full"
-                onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-              >
-                <PanelLeftClose className="h-4 w-4" />
-              </Button>
+              <div className="absolute -right-3 top-1/2 -translate-y-1/2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 backdrop-blur-sm shadow-md rounded-full hover:scale-110 transition-all duration-300"
+                  onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+                >
+                  <PanelLeftClose className={`h-4 w-4 transition-transform duration-300 ${!leftSidebarOpen && 'rotate-180'}`} />
+                </Button>
+              </div>
               <SourcePanel 
                 sources={sources} 
                 onSourceAdd={(source) => setSources([...sources, source])}
@@ -126,21 +129,23 @@ const Index = () => {
 
           {/* Right Sidebar */}
           <div className={cn(
-            "w-80 shrink-0 transition-all duration-300 relative",
-            rightSidebarOpen ? "translate-x-0" : "translate-x-full",
+            "w-80 shrink-0 transition-all duration-500 ease-in-out transform",
+            rightSidebarOpen ? "translate-x-0" : "translate-x-[calc(100%-24px)]",
             "absolute lg:relative right-0 z-40",
             "lg:translate-x-0",
-            !rightSidebarOpen && "lg:w-0"
+            !rightSidebarOpen && "lg:w-6"
           )}>
             <div className="h-full glass-panel p-2 relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute -left-3 top-2 z-50 bg-background/80 backdrop-blur-sm shadow-md rounded-full"
-                onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-              >
-                <PanelRightClose className="h-4 w-4" />
-              </Button>
+              <div className="absolute -left-3 top-1/2 -translate-y-1/2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 backdrop-blur-sm shadow-md rounded-full hover:scale-110 transition-all duration-300"
+                  onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+                >
+                  <PanelRightClose className={`h-4 w-4 transition-transform duration-300 ${!rightSidebarOpen && 'rotate-180'}`} />
+                </Button>
+              </div>
               <StudioPanel 
                 onNoteSelect={handleNoteSelect}
                 isFullScreen={false}
