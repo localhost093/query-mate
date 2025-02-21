@@ -1,5 +1,5 @@
 
-import { Send, Save, FileText, Mic } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
@@ -25,26 +25,34 @@ const ChatPanel = ({ selectedSource, selectedNote }: ChatPanelProps) => {
 
   const handleSend = async () => {
     if (message.trim()) {
-      setMessages([...messages, { text: message, sender: "user" }]);
+      // Add user message immediately
+      setMessages(prev => [...prev, { text: message, sender: "user" }]);
+      const currentMessage = message;
       setMessage("");
 
       try {
-        const response = await fetch('http://localhost:8000/chat', {
+        const response = await fetch('http://localhost:8090/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ message, source: selectedSource }),
+          body: JSON.stringify({ 
+            message: currentMessage,
+            source: selectedSource 
+          }),
         });
 
-        if (!response.ok) throw new Error('Chat request failed');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
         setMessages(prev => [...prev, { text: data.response, sender: "ai" }]);
       } catch (error) {
+        console.error('Chat error:', error);
         toast({
           title: "Error",
-          description: "Failed to get response from the chat service.",
+          description: "Failed to get response from the chat service. Please ensure the backend server is running.",
           variant: "destructive",
         });
       }
@@ -83,7 +91,7 @@ const ChatPanel = ({ selectedSource, selectedNote }: ChatPanelProps) => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Start typing..."
-              className="capsule-input"
+              className="w-full rounded-full pl-4 pr-24 py-2 bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2 items-center">
               <span className="text-sm text-muted-foreground">
@@ -91,7 +99,7 @@ const ChatPanel = ({ selectedSource, selectedNote }: ChatPanelProps) => {
               </span>
               <Button 
                 size="icon" 
-                className="round-button"
+                className="rounded-full h-8 w-8"
                 onClick={handleSend}
               >
                 <Send className="h-4 w-4" />

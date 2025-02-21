@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
@@ -33,7 +32,6 @@ const Index = () => {
 
   const handleBackToChat = () => {
     setSelectedNote(undefined);
-    setSelectedSource(undefined);
   };
 
   const handleSourceDelete = (source: string) => {
@@ -48,6 +46,11 @@ const Index = () => {
     if (selectedSource === oldName) {
       setSelectedSource(newName);
     }
+  };
+
+  const handleSourceSelect = (source: string) => {
+    console.log('Source selected:', source);
+    setSelectedSource(source);
   };
 
   return (
@@ -96,7 +99,7 @@ const Index = () => {
               <SourcePanel 
                 sources={sources} 
                 onSourceAdd={(source) => setSources([...sources, source])}
-                onSourceSelect={setSelectedSource}
+                onSourceSelect={handleSourceSelect}
                 onSourceDelete={handleSourceDelete}
                 onSourceRename={handleSourceRename}
                 onBackToChat={handleBackToChat}
