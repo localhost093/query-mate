@@ -1,11 +1,16 @@
-
-import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, Minimize2, Maximize2 } from "lucide-react";
+import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, Minimize2, Maximize2, Heading1, Heading2, Bold, Italic, ListOrdered, List, Undo, Redo } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
-import MarkdownEditor from "./MarkdownEditor";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface Note {
   id: string;
@@ -42,6 +47,8 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
   const [newNoteTitle, setNewNoteTitle] = useState("");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedNote, setSelectedNote] = useState<Note | undefined>(undefined);
+  const [editHistory, setEditHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   const handleAddFolder = () => {
     if (newFolderName.trim()) {
@@ -80,6 +87,91 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
     ));
   };
 
+  const handleNoteClick = (note: Note) => {
+    setSelectedNote(note);
+    setEditHistory([note.content]);
+    setHistoryIndex(0);
+  };
+
+  const handleContentChange = (content: string) => {
+    if (!selectedNote) return;
+    
+    const newHistory = editHistory.slice(0, historyIndex + 1);
+    newHistory.push(content);
+    setEditHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+    
+    setNotes(notes.map(note =>
+      note.id === selectedNote.id ? { ...note, content } : note
+    ));
+  };
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      const content = editHistory[historyIndex - 1];
+      setNotes(notes.map(note =>
+        note.id === selectedNote?.id ? { ...note, content } : note
+      ));
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < editHistory.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      const content = editHistory[historyIndex + 1];
+      setNotes(notes.map(note =>
+        note.id === selectedNote?.id ? { ...note, content } : note
+      ));
+    }
+  };
+
+  const insertMarkdown = (type: string) => {
+    if (!selectedNote) return;
+    
+    const textArea = document.querySelector('textarea') as HTMLTextAreaElement;
+    if (!textArea) return;
+
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    const text = selectedNote.content;
+    let newText = text;
+    let newCursorPos = start;
+
+    switch (type) {
+      case 'h1':
+        newText = text.slice(0, start) + '# ' + text.slice(start);
+        newCursorPos = start + 2;
+        break;
+      case 'h2':
+        newText = text.slice(0, start) + '## ' + text.slice(start);
+        newCursorPos = start + 3;
+        break;
+      case 'bold':
+        newText = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
+        newCursorPos = end + 4;
+        break;
+      case 'italic':
+        newText = text.slice(0, start) + '*' + text.slice(start, end) + '*' + text.slice(end);
+        newCursorPos = end + 2;
+        break;
+      case 'bullet':
+        newText = text.slice(0, start) + '- ' + text.slice(start);
+        newCursorPos = start + 2;
+        break;
+      case 'number':
+        newText = text.slice(0, start) + '1. ' + text.slice(start);
+        newCursorPos = start + 3;
+        break;
+    }
+
+    handleContentChange(newText);
+    setTimeout(() => {
+      textArea.focus();
+      textArea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
   return (
     <div className="h-full flex flex-col bg-background rounded-xl">
       <div className="p-4 border-b border-border flex items-center justify-between">
@@ -101,140 +193,125 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
           >
             <Plus className="h-4 w-4" />
           </Button>
-          {onToggleFullScreen && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={onToggleFullScreen}
-            >
-              {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
-          )}
         </div>
       </div>
 
-      <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-        {showNewFolder && (
-          <div className="space-y-2">
-            <Input
-              placeholder="Folder name"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              className="bg-background"
-            />
-            <div className="flex gap-2">
-              <Button 
-                variant="default" 
-                className="flex-1"
-                onClick={handleAddFolder}
-              >
-                Add
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={() => setShowNewFolder(false)}
-              >
-                Cancel
-              </Button>
-            </div>
+      {selectedNote ? (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="border-b border-border p-2 flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedNote(undefined)}>
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+            <span className="flex-1 text-sm font-medium truncate">{selectedNote.title}</span>
           </div>
-        )}
-
-        {showNewNote && (
-          <div className="space-y-2">
-            <Input
-              placeholder="Note title"
-              value={newNoteTitle}
-              onChange={(e) => setNewNoteTitle(e.target.value)}
-              className="bg-background"
-            />
-            <select
-              className="w-full p-2 rounded-md border border-border bg-background"
-              onChange={(e) => setSelectedFolderId(e.target.value)}
-            >
-              <option value="">Select folder</option>
-              {folders.map(folder => (
-                <option key={folder.id} value={folder.id}>
-                  {folder.name}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2">
-              <Button 
-                variant="default" 
-                className="flex-1"
-                onClick={handleAddNote}
-              >
-                Add
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={() => setShowNewNote(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {isFullScreen && selectedNote ? (
-          <MarkdownEditor
-            content={selectedNote.content}
-            onChange={(content) => {
-              setNotes(notes.map(note =>
-                note.id === selectedNote.id ? { ...note, content } : note
-              ));
-            }}
-            isFullScreen={isFullScreen}
-            onToggleFullScreen={onToggleFullScreen}
-          />
-        ) : (
-          <div className="space-y-2">
-            {folders.map(folder => (
-              <div key={folder.id} className="space-y-1">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => toggleFolder(folder.id)}
-                >
-                  {folder.isOpen ? 
-                    <ChevronDown className="mr-2 h-4 w-4" /> : 
-                    <ChevronRight className="mr-2 h-4 w-4" />
-                  }
-                  {folder.name}
+          <div className="p-2 border-b border-border flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Heading1 className="h-4 w-4" />
                 </Button>
-                
-                {folder.isOpen && (
-                  <div className="ml-4 space-y-1">
-                    {notes
-                      .filter(note => note.folderId === folder.id)
-                      .map(note => {
-                        return (
-                          <Button
-                            key={note.id}
-                            variant="ghost"
-                            className="w-full justify-start pl-6"
-                            onClick={() => {
-                              onNoteSelect(note.id);
-                              setSelectedNote(note);
-                            }}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            {note.title}
-                          </Button>
-                        );
-                      })
-                    }
-                  </div>
-                )}
-              </div>
-            ))}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => insertMarkdown('h1')}>
+                    <Heading1 className="h-4 w-4 mr-2" />
+                    Heading 1
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => insertMarkdown('h2')}>
+                    <Heading2 className="h-4 w-4 mr-2" />
+                    Heading 2
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('bold')}>
+              <Bold className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('italic')}>
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('bullet')}>
+              <List className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('number')}>
+              <ListOrdered className="h-4 w-4" />
+            </Button>
+            <div className="border-l border-border h-6 mx-1" />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleUndo}
+              disabled={historyIndex <= 0}
+            >
+              <Undo className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRedo}
+              disabled={historyIndex >= editHistory.length - 1}
+            >
+              <Redo className="h-4 w-4" />
+            </Button>
           </div>
-        )}
-      </div>
+          <div className="flex-1 overflow-y-auto">
+            <textarea
+              value={selectedNote.content}
+              onChange={(e) => handleContentChange(e.target.value)}
+              className="w-full h-full p-4 bg-background resize-none focus:outline-none text-foreground font-mono"
+              placeholder="Start writing... Use the toolbar above for formatting."
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+          {folders.map(folder => (
+            <div key={folder.id} className="space-y-1">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => toggleFolder(folder.id)}
+              >
+                {folder.isOpen ? 
+                  <ChevronDown className="mr-2 h-4 w-4" /> : 
+                  <ChevronRight className="mr-2 h-4 w-4" />
+                }
+                {folder.name}
+              </Button>
+              
+              {folder.isOpen && (
+                <div className="ml-4 space-y-1">
+                  {notes
+                    .filter(note => note.folderId === folder.id)
+                    .map(note => {
+                      return (
+                        <Button
+                          key={note.id}
+                          variant="ghost"
+                          className="w-full justify-start pl-6"
+                          onClick={() => {
+                            onNoteSelect(note.id);
+                            setSelectedNote(note);
+                          }}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          {note.title}
+                        </Button>
+                      );
+                    })
+                  }
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <SettingsDialog 
+        open={showSettings} 
+        onOpenChange={setShowSettings}
+      />
     </div>
   );
 };
