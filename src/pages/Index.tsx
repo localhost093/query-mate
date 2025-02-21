@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import SourcePanel from "../components/SourcePanel";
 import ChatPanel from "../components/ChatPanel";
@@ -82,7 +81,7 @@ const Index = () => {
         <div className="relative h-full flex gap-4">
           {/* Left Sidebar */}
           <div className={cn(
-            "w-80 shrink-0 transition-all duration-500 ease-in-out transform",
+            "w-96 shrink-0 transition-all duration-500 ease-in-out transform", // Increased from w-80 to w-96
             leftSidebarOpen ? "translate-x-0" : "-translate-x-[calc(100%-24px)]",
             "absolute lg:relative left-0 z-40",
             "lg:translate-x-0",
@@ -112,24 +111,15 @@ const Index = () => {
 
           {/* Main Chat Area */}
           <div className="flex-1 glass-panel">
-            {selectedNote ? (
-              <MarkdownEditor
-                content={selectedNote}
-                onChange={setSelectedNote}
-                isFullScreen={false}
-                onToggleFullScreen={() => {}}
-              />
-            ) : (
-              <ChatPanel 
-                selectedSource={selectedSource} 
-                selectedNote={selectedNote}
-              />
-            )}
+            <ChatPanel 
+              selectedSource={selectedSource} 
+              selectedNote={selectedNote}
+            />
           </div>
 
           {/* Right Sidebar */}
           <div className={cn(
-            "w-80 shrink-0 transition-all duration-500 ease-in-out transform",
+            "w-96 shrink-0 transition-all duration-500 ease-in-out transform", // Increased from w-80 to w-96
             rightSidebarOpen ? "translate-x-0" : "translate-x-[calc(100%-24px)]",
             "absolute lg:relative right-0 z-40",
             "lg:translate-x-0",

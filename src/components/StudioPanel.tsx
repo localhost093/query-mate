@@ -1,4 +1,3 @@
-
 import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, ChevronLeft, Heading1, Heading2, Bold, Italic, ListOrdered, List, Undo, Redo } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -92,7 +91,6 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
     setSelectedNote(note);
     setEditHistory([note.content]);
     setHistoryIndex(0);
-    onNoteSelect(note.id);
   };
 
   const handleContentChange = (content: string) => {
@@ -191,122 +189,18 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
             variant="ghost" 
             size="icon"
             className="h-8 w-8"
-            onClick={() => setShowNewNote(true)}
+            onClick={() => {
+              setShowNewNote(true);
+              setSelectedFolderId(folders[0].id); // Set default folder if none selected
+            }}
           >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {selectedNote ? (
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="border-b border-border p-2 flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => setSelectedNote(undefined)}>
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-            <span className="flex-1 text-sm font-medium truncate">{selectedNote.title}</span>
-          </div>
-          <div className="p-2 border-b border-border flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Heading1 className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => insertMarkdown('h1')}>
-                    <Heading1 className="h-4 w-4 mr-2" />
-                    Heading 1
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => insertMarkdown('h2')}>
-                    <Heading2 className="h-4 w-4 mr-2" />
-                    Heading 2
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('bold')}>
-              <Bold className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('italic')}>
-              <Italic className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('bullet')}>
-              <List className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => insertMarkdown('number')}>
-              <ListOrdered className="h-4 w-4" />
-            </Button>
-            <div className="border-l border-border h-6 mx-1" />
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleUndo}
-              disabled={historyIndex <= 0}
-            >
-              <Undo className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleRedo}
-              disabled={historyIndex >= editHistory.length - 1}
-            >
-              <Redo className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <textarea
-              value={selectedNote.content}
-              onChange={(e) => handleContentChange(e.target.value)}
-              className="w-full h-full p-4 bg-background resize-none focus:outline-none text-foreground font-mono"
-              placeholder="Start writing... Use the toolbar above for formatting."
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-          {folders.map(folder => (
-            <div key={folder.id} className="space-y-1">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => toggleFolder(folder.id)}
-              >
-                {folder.isOpen ? 
-                  <ChevronDown className="mr-2 h-4 w-4" /> : 
-                  <ChevronRight className="mr-2 h-4 w-4" />
-                }
-                {folder.name}
-              </Button>
-              
-              {folder.isOpen && (
-                <div className="ml-4 space-y-1">
-                  {notes
-                    .filter(note => note.folderId === folder.id)
-                    .map(note => (
-                      <Button
-                        key={note.id}
-                        variant="ghost"
-                        className="w-full justify-start pl-6"
-                        onClick={() => handleNoteClick(note)}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        {note.title}
-                      </Button>
-                    ))
-                  }
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
       {showNewFolder && (
-        <div className="p-4 border-t border-border">
+        <div className="absolute top-16 right-0 left-0 p-4 border-b border-border bg-background z-10">
           <Input
             value={newFolderName}
             onChange={(e) => setNewFolderName(e.target.value)}
@@ -322,13 +216,14 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
       )}
 
       {showNewNote && (
-        <div className="p-4 border-t border-border">
+        <div className="absolute top-16 right-0 left-0 p-4 border-b border-border bg-background z-10">
           <Input
             value={newNoteTitle}
             onChange={(e) => setNewNoteTitle(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
             placeholder="New note title..."
             className="mb-2"
+            autoFocus
           />
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setShowNewNote(false)}>Cancel</Button>
@@ -336,6 +231,115 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
           </div>
         </div>
       )}
+
+      <div className="flex-1 overflow-y-auto">
+        {selectedNote ? (
+          <div className="flex flex-col h-full">
+            <div className="border-b border-border p-2 flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setSelectedNote(undefined)}>
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+              <span className="flex-1 text-sm font-medium truncate">{selectedNote.title}</span>
+            </div>
+            <div className="p-2 border-b border-border flex items-center gap-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Heading1 className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => insertMarkdown('h1')}>
+                      <Heading1 className="h-4 w-4 mr-2" />
+                      Heading 1
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => insertMarkdown('h2')}>
+                      <Heading2 className="h-4 w-4 mr-2" />
+                      Heading 2
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button variant="ghost" size="sm" onClick={() => insertMarkdown('bold')}>
+                <Bold className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => insertMarkdown('italic')}>
+                <Italic className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => insertMarkdown('bullet')}>
+                <List className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => insertMarkdown('number')}>
+                <ListOrdered className="h-4 w-4" />
+              </Button>
+              <div className="border-l border-border h-6 mx-1" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleUndo}
+                disabled={historyIndex <= 0}
+              >
+                <Undo className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRedo}
+                disabled={historyIndex >= editHistory.length - 1}
+              >
+                <Redo className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex-1 p-4">
+              <textarea
+                value={selectedNote.content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className="w-full h-full resize-none p-2 bg-background text-foreground focus:outline-none border rounded-md"
+                placeholder="Start writing your note..."
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 space-y-4">
+            {folders.map(folder => (
+              <div key={folder.id} className="space-y-1">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => toggleFolder(folder.id)}
+                >
+                  {folder.isOpen ? 
+                    <ChevronDown className="mr-2 h-4 w-4" /> : 
+                    <ChevronRight className="mr-2 h-4 w-4" />
+                  }
+                  {folder.name}
+                </Button>
+                
+                {folder.isOpen && (
+                  <div className="ml-4 space-y-1">
+                    {notes
+                      .filter(note => note.folderId === folder.id)
+                      .map(note => (
+                        <Button
+                          key={note.id}
+                          variant="ghost"
+                          className="w-full justify-start pl-6"
+                          onClick={() => handleNoteClick(note)}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          {note.title}
+                        </Button>
+                      ))
+                    }
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

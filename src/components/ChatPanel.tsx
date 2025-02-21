@@ -91,7 +91,7 @@ const ChatPanel = ({ selectedSource, selectedNote }: ChatPanelProps) => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Start typing..."
-              className="w-full rounded-full pl-4 pr-24 py-2 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 bg-white border border-black focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+              className="w-full rounded-full pl-4 pr-24 py-3 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 bg-white border border-black focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-base"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-2 items-center">
               <span className="text-sm text-muted-foreground">
@@ -99,10 +99,10 @@ const ChatPanel = ({ selectedSource, selectedNote }: ChatPanelProps) => {
               </span>
               <Button 
                 size="icon" 
-                className="rounded-full h-8 w-8 bg-blue-500 hover:bg-blue-600 transition-colors duration-300 hover:scale-110"
+                className="rounded-full h-10 w-10 bg-blue-500 hover:bg-blue-600 transition-colors duration-300 hover:scale-110"
                 onClick={handleSend}
               >
-                <Send className="h-4 w-4 text-white" />
+                <Send className="h-5 w-5 text-white" />
               </Button>
             </div>
           </div>
