@@ -1,4 +1,5 @@
-import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, Minimize2, Maximize2, Heading1, Heading2, Bold, Italic, ListOrdered, List, Undo, Redo } from "lucide-react";
+
+import { FileText, Plus, FolderPlus, ChevronRight, ChevronDown, ChevronLeft, Heading1, Heading2, Bold, Italic, ListOrdered, List, Undo, Redo } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
@@ -91,6 +92,7 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
     setSelectedNote(note);
     setEditHistory([note.content]);
     setHistoryIndex(0);
+    onNoteSelect(note.id);
   };
 
   const handleContentChange = (content: string) => {
@@ -284,22 +286,17 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
                 <div className="ml-4 space-y-1">
                   {notes
                     .filter(note => note.folderId === folder.id)
-                    .map(note => {
-                      return (
-                        <Button
-                          key={note.id}
-                          variant="ghost"
-                          className="w-full justify-start pl-6"
-                          onClick={() => {
-                            onNoteSelect(note.id);
-                            setSelectedNote(note);
-                          }}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          {note.title}
-                        </Button>
-                      );
-                    })
+                    .map(note => (
+                      <Button
+                        key={note.id}
+                        variant="ghost"
+                        className="w-full justify-start pl-6"
+                        onClick={() => handleNoteClick(note)}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        {note.title}
+                      </Button>
+                    ))
                   }
                 </div>
               )}
@@ -308,10 +305,37 @@ const StudioPanel = ({ onNoteSelect, isFullScreen, onToggleFullScreen }: StudioP
         </div>
       )}
 
-      <SettingsDialog 
-        open={showSettings} 
-        onOpenChange={setShowSettings}
-      />
+      {showNewFolder && (
+        <div className="p-4 border-t border-border">
+          <Input
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddFolder()}
+            placeholder="New folder name..."
+            className="mb-2"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setShowNewFolder(false)}>Cancel</Button>
+            <Button onClick={handleAddFolder}>Create</Button>
+          </div>
+        </div>
+      )}
+
+      {showNewNote && (
+        <div className="p-4 border-t border-border">
+          <Input
+            value={newNoteTitle}
+            onChange={(e) => setNewNoteTitle(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
+            placeholder="New note title..."
+            className="mb-2"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setShowNewNote(false)}>Cancel</Button>
+            <Button onClick={handleAddNote}>Create</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
