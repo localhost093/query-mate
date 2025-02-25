@@ -1,16 +1,17 @@
 import os
-# Force transformers to run in offline mode
+# Force transformers to run offline
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import FAISS
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain.llms import Ollama
-from langchain.chains import RetrievalQA
+# Updated imports from langchain_community
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+from langchain_community.llms import Ollama
+from langchain_community.chains import RetrievalQA
 
 import shutil
 
@@ -25,12 +26,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Define paths for the vector store and uploads
+# Define paths for the vector store and file uploads
 VECTOR_DB_PATH = "backend/vectorstore"
 os.makedirs(VECTOR_DB_PATH, exist_ok=True)
 
 # Initialize the offline embeddings model.
-# Ensure that the model "all-MiniLM-L6-v2" is available locally (download if needed).
+# Ensure that the model "all-MiniLM-L6-v2" is available locally.
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 # Global variable to hold the vector store (populated after file upload)
