@@ -1,6 +1,9 @@
 import os
-# Force transformers to run offline
-os.environ["TRANSFORMERS_OFFLINE"] = "1"
+# For now, we are fetching the Hugging Face embeddings online.
+# To run offline, follow these steps:
+# 1. Download and cache the Hugging Face model (e.g., "all-MiniLM-L6-v2") locally.
+# 2. Uncomment the line below to force transformers into offline mode.
+# os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,51 +14,53 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
-from langchain_community.chains import RetrievalQA
+from langchain_community.chains import RetrievalQAChain
 
 import shutil
 
 app = FastAPI()
 
-# Enable CORS for frontend communication (update allowed origins for production)
+# Enable CORS for frontend communication.
+# In production, replace "*" with your frontend's domain.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace "*" with your frontend's URL in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Define paths for the vector store and file uploads
+# Define paths for the vector store and uploads
 VECTOR_DB_PATH = "backend/vectorstore"
 os.makedirs(VECTOR_DB_PATH, exist_ok=True)
 
-# Initialize the offline embeddings model.
-# Ensure that the model "all-MiniLM-L6-v2" is available locally.
+# Initialize the Hugging Face embeddings model.
+# By default, this will fetch the model online.
+# When switching to offline mode, ensure the model is cached locally and uncomment the offline line above.
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Global variable to hold the vector store (populated after file upload)
+# Global variable to hold the vector store (populated after a file is uploaded)
 vector_store = None
 
-# Pydantic model for chat requests
+# Pydantic model for chat requests.
 class ChatRequest(BaseModel):
     query: str
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
-    # Ensure the uploads directory exists
+    # Ensure the uploads directory exists.
     os.makedirs("backend/uploads", exist_ok=True)
     file_path = f"backend/uploads/{file.filename}"
     
-    # Save the uploaded file locally
+    # Save the uploaded file locally.
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Process the PDF using PyPDFLoader
+    # Load and process the PDF using PyPDFLoader.
     loader = PyPDFLoader(file_path)
     docs = loader.load()
     
-    # Create a FAISS vector store from the documents using offline embeddings
+    # Create a FAISS vector store from the documents using the Hugging Face embeddings.
     global vector_store
     vector_store = FAISS.from_documents(docs, embeddings)
     vector_store.save_local(VECTOR_DB_PATH)
@@ -69,19 +74,15 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=400, detail="No documents uploaded yet.")
     
     # Initialize the Ollama LLM.
-    # Adjust 'model' and 'base_url' according to your local Ollama configuration.
+    # Adjust 'model' and 'base_url' as required for your local Ollama configuration.
     llm = Ollama(model="llama2", base_url="http://localhost:11434")
     
-    # Build a RetrievalQA chain that retrieves relevant document snippets
-    # from the vector store and uses Ollama to generate a response.
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vector_store.as_retriever()
-    )
+    # Build a retrieval QA chain that uses the vector store's retriever and Ollama to answer queries.
+    # The 'chain_type' parameter is set to "stuff" as an example. Adjust if necessary.
+    qa_chain = RetrievalQAChain(llm=llm, retriever=vector_store.as_retriever(), chain_type="stuff")
     
-    # Run the chain with the incoming query.
-    response = qa.run(request.query)
+    # Run the QA chain with the incoming query.
+    response = qa_chain.run(request.query)
     return {"response": response}
 
 if __name__ == "__main__":
